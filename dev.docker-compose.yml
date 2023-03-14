@@ -1,0 +1,42 @@
+version: '3'
+services:
+    api:
+        container_name: transaction-api
+        restart: always
+        build:
+            dockerfile: Dockerfile
+            context: .
+            # Only will build development stage from our dockerfile
+            target: development
+        volumes:
+            - .:/usr/src/app
+        env_file:
+            - .env
+        # Run a command against the development stage of the image
+        command: npm run start:dev
+        ports:
+            - 3002:3002
+        networks:
+            - wallet-network
+    postgres:
+        image: postgres:14.1-alpine
+        container_name: transaction-db
+        restart: always
+        volumes:
+            - "postgres-data:/var/lib/postgresql/data"
+        environment:
+            - POSTGRES_USER=transaction
+            - POSTGRES_PASSWORD=transaction
+            - POSTGRES_DB=transaction
+        ports:
+            - "5433:5432"
+        networks:
+            - wallet-network
+
+networks:
+  wallet-network:
+    external: true
+volumes:
+    cache:
+        driver: local
+    postgres-data:
